@@ -19,7 +19,7 @@ from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, median_absolute_error
 
 from sklearn.preprocessing import MinMaxScaler
-
+from scipy.stats import pearsonr
 import statsmodels.api as sm
 
 import matplotlib.pyplot as plt 
@@ -51,7 +51,9 @@ print(df.head())
 
 ##############################################
 # Define as métricas
-def get_regression_metrics(y_test, y_pred, modelo,params):
+def get_regression_metrics(y_test, y_pred, modelo):
+        # Calcula a correlação de Pearson
+    corr, p_valor = pearsonr(y_test, y_pred)
     metrics = {
         "MODELO":modelo,
         "MAE": mean_absolute_error(y_test, y_pred),
@@ -60,11 +62,11 @@ def get_regression_metrics(y_test, y_pred, modelo,params):
         "R2": r2_score(y_test, y_pred),
         "MAPE": np.mean(np.abs((y_test - y_pred) / y_test)) * 100,
         "MedAE": median_absolute_error(y_test, y_pred),
-        "params":params,
-        "syx": np.sqrt(mean_squared_error(y_test, y_pred) / (len(y_test) - len(X_train.columns) - 1))
+        "syx": np.sqrt(mean_squared_error(y_test, y_pred) / (len(y_test) - len(X_train.columns) - 1)),
+        "PEARSON_R": corr,
+        "P_VALOR_PEARSON": p_valor
     }
     return metrics
-
 
 ##############################################
 # Mostra gráfico de correlação
@@ -86,7 +88,7 @@ columns = list(X.columns)
 X = scaler.fit_transform(X)
 X = pd.DataFrame(X, columns=columns)
   
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 9)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = random_seed)
 
 #X.head()
 
@@ -113,8 +115,30 @@ grid = GridSearchCV(KNeighborsRegressor(), param_grid, n_jobs= -1, cv=9)
 grid.fit(X_train, y_train)
 
 y_pred = grid.predict(X_test)
-metrics_model = get_regression_metrics(y_test, y_pred,"KNeighborsRegressor",grid.best_estimator_)
+metrics_model = get_regression_metrics(y_test, y_pred,"KNeighborsRegressor")
 results.append(metrics_model)
+
+
+
+# --- Seção de Impressão de Métricas (MODIFICADA para maior clareza) ---
+print('\n' + '='*50)
+print('EXPERIMENTO KNN - Biomassa')
+print('='*50)
+print('\nMelhores parâmetros encontrados:')
+best_params = grid.best_params_
+print(f"Melhores parametros: {best_params}")
+print('\n--- Métricas de Avaliação no Conjunto de Teste ---')
+
+print(f"Erro Médio Absoluto (MAE):         {metrics_model['MAE']:.8f}")
+print(f"Erro Quadrático Médio (MSE):         {metrics_model['MSE']:.8f}")
+print(f"Raiz do Erro Quadrático Médio (RMSE):{metrics_model['RMSE']:.8f}")
+print(f"R-quadrado (R²):                     {metrics_model['R2']:.8f}")
+print(f"Coeficiente de Pearson (r):          {metrics_model['PEARSON_R']:.8f}")
+print(f"P-Valor (Pearson):                   {metrics_model['P_VALOR_PEARSON']:.8f}") # Usando 'g' para notação científica se for muito pequeno
+print(f"Erro Médio Absoluto Percentual (MAPE):{metrics_model['MAPE']:.8f}%")
+print(f"Erro Padrão da Estimativa (Syx):      {metrics_model['syx']:.8f}")
+print(f"Erro Absoluto Mediano (MedAE):       {metrics_model['MedAE']:.8f}")
+print('='*50)
 
 print((metrics_model))
 
@@ -146,7 +170,7 @@ print("Erro Médio Absoluto Percentual (MAPE):", mape)
 medae = median_absolute_error(y_test, y_pred)
 print("Erro Absoluto Mediano:", medae)
 
-syx = np.sqrt(mean_squared_error(y_test, y_pred) / (len(y_test) - len(X_train.columns) - 1))
+syx = np.sqrt(mse / (len(y_test) - len(X_train.columns) - 1))
 print("Erro Padrão da Estimativa (Syx):", syx)
 
 
