@@ -75,6 +75,7 @@ class_reportSemCV = classification_report(y_test, y_predSemCV)
 jaccardSemCV = jaccard_score(y_test, y_predSemCV, average=None)
 cohen_kappaSemCV = cohen_kappa_score(y_test, y_predSemCV)
 hammingSemCV = hamming_loss(y_test, y_predSemCV)
+
 ##############################################
 # EXPERIMENTO RF
 # Este Grid demora 17 minutos rodando no Mac

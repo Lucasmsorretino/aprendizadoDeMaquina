@@ -122,7 +122,7 @@ results.append(metrics_model)
 
 # --- Seção de Impressão de Métricas (MODIFICADA para maior clareza) ---
 print('\n' + '='*50)
-print('EXPERIMENTO KNN - Biomassa')
+print('EXPERIMENTO KNN - Admissão')
 print('='*50)
 print('\nMelhores parâmetros encontrados:')
 best_params = grid.best_params_
@@ -144,7 +144,6 @@ print((metrics_model))
 
 print(' ')
 print('###########################')
-print('EXPERIMENTO KNN - Admissão')
 print(' ')
 print('Melhores parâmetros:')
 print(' ')

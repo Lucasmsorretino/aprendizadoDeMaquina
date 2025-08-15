@@ -17,6 +17,7 @@ from sklearn.neural_network import MLPRegressor
 
 from sklearn.metrics import classification_report, accuracy_score
 from sklearn.metrics import mean_absolute_error, r2_score, median_absolute_error, mean_squared_error
+from scipy.stats import pearsonr
 
 from sklearn.preprocessing import MinMaxScaler
 
@@ -27,7 +28,7 @@ import seaborn as sns
 import joblib
 
 # Definida as sementes para reprodutibilidade
-random_seed = 196572
+random_seed = 202526
 np.random.seed(random_seed)
 
 scaler = MinMaxScaler()
@@ -37,7 +38,7 @@ le = preprocessing.LabelEncoder()
 
 ##############################################
 # Abre o arquivo e mostra o conteúdo
-df = pd.read_csv('/Users/jaimewojciechowski/Dropbox/Jaime/AA-UFPR/EspecializacaoIAA2026/Praticas Python/5 - Biomassa/Biomassa - Dados.csv',sep=',')
+df = pd.read_csv('Biomassa - Dados.csv',sep=',')
 #df = df.drop('num', axis = 1)
 results = []
 
@@ -50,6 +51,8 @@ print(df.head())
 ##############################################
 # Define as métricas
 def get_regression_metrics(y_test, y_pred, modelo):
+        # Calcula a correlação de Pearson
+    corr, p_valor = pearsonr(y_test, y_pred)
     metrics = {
         "MODELO":modelo,
         "MAE": mean_absolute_error(y_test, y_pred),
@@ -57,7 +60,10 @@ def get_regression_metrics(y_test, y_pred, modelo):
         "RMSE": np.sqrt(mean_squared_error(y_test, y_pred)),
         "R2": r2_score(y_test, y_pred),
         "MAPE": np.mean(np.abs((y_test - y_pred) / y_test)) * 100,
-        "MedAE": median_absolute_error(y_test, y_pred)
+        "MedAE": median_absolute_error(y_test, y_pred),
+        "syx": np.sqrt(mean_squared_error(y_test, y_pred) / (len(y_test) - len(X_train.columns) - 1)),
+        "PEARSON_R": corr,
+        "P_VALOR_PEARSON": p_valor
     }
     return metrics
 
@@ -79,10 +85,15 @@ columns = list(X.columns)
 X = scaler.fit_transform(X)
 X = pd.DataFrame(X, columns=columns)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 9)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = random_seed)
 #X.head()
 
+rfSemCV = RandomForestRegressor(n_estimators=20, max_depth=15, random_state=random_seed)
+rfSemCV.fit(X_train, y_train)
 
+y_predSemCV = rfSemCV.predict(X_test)
+metrics_modelSemCV = get_regression_metrics(y_test, y_predSemCV,"RandomForestRegressor")
+results.append(metrics_modelSemCV)
 
 ##############################################
 # EXPERIMENTO RF
@@ -106,33 +117,72 @@ metrics_model = get_regression_metrics(y_test, y_pred,"RandomForestRegressor")
 results.append(metrics_model)
 
 
-print(' ')
-print('###########################')
-print('EXPERIMENTO SVM - Biomassa')
-print(' ')
-print('Melhores parâmetros:')
-print(' ')
+# --- Seção de Impressão de Métricas  ---
 
-best_params = grid.best_estimator_
+# --- Métricas sem CV ---
+print('\n' + '='*50)
+print('EXPERIMENTO KNN - Biomassa')
+print('='*50)
+print('\n--- Métricas de Avaliação no Conjunto de Teste sem Cross Validation---')
+
+print(f"Erro Médio Absoluto (MAE):         {metrics_modelSemCV['MAE']:.8f}")
+print(f"Erro Quadrático Médio (MSE):         {metrics_modelSemCV['MSE']:.8f}")
+print(f"Raiz do Erro Quadrático Médio (RMSE):{metrics_modelSemCV['RMSE']:.8f}")
+print(f"R-quadrado (R²):                     {metrics_modelSemCV['R2']:.8f}")
+print(f"Coeficiente de Pearson (r):          {metrics_modelSemCV['PEARSON_R']:.8f}")
+print(f"P-Valor (Pearson):                   {metrics_modelSemCV['P_VALOR_PEARSON']:.8f}") # Usando 'g' para notação científica se for muito pequeno
+print(f"Erro Médio Absoluto Percentual (MAPE):{metrics_modelSemCV['MAPE']:.8f}%")
+print(f"Erro Padrão da Estimativa (Syx):      {metrics_modelSemCV['syx']:.8f}")
+print(f"Erro Absoluto Mediano (MedAE):       {metrics_modelSemCV['MedAE']:.8f}")
+print('='*50)
+
+# --- Métricas com CV ---
+
+
+print('='*50)
+print('\nMelhores parâmetros encontrados:')
+best_params = grid.best_params_
 print(f"Melhores parametros: {best_params}")
+print('\n--- Métricas de Avaliação no Conjunto de Teste com Cross Validation---')
 
-mae = mean_absolute_error(y_test, y_pred)
-print("Erro Médio Absoluto:", mae)
+print(f"Erro Médio Absoluto (MAE):         {metrics_model['MAE']:.8f}")
+print(f"Erro Quadrático Médio (MSE):         {metrics_model['MSE']:.8f}")
+print(f"Raiz do Erro Quadrático Médio (RMSE):{metrics_model['RMSE']:.8f}")
+print(f"R-quadrado (R²):                     {metrics_model['R2']:.8f}")
+print(f"Coeficiente de Pearson (r):          {metrics_model['PEARSON_R']:.8f}")
+print(f"P-Valor (Pearson):                   {metrics_model['P_VALOR_PEARSON']:.8f}") # Usando 'g' para notação científica se for muito pequeno
+print(f"Erro Médio Absoluto Percentual (MAPE):{metrics_model['MAPE']:.8f}%")
+print(f"Erro Padrão da Estimativa (Syx):      {metrics_model['syx']:.8f}")
+print(f"Erro Absoluto Mediano (MedAE):       {metrics_model['MedAE']:.8f}")
+print('='*50)
 
-mse = mean_squared_error(y_test, y_pred)
-print("Erro Quadrático Médio:", mse)
+# print(' ')
+# print('###########################')
+# print('EXPERIMENTO SVM - Biomassa')
+# print(' ')
+# print('Melhores parâmetros:')
+# print(' ')
 
-rmse = np.sqrt(mse)
-print("Raiz do Erro Quadrático Médio:", rmse)
+# best_params = grid.best_estimator_
+# print(f"Melhores parametros: {best_params}")
 
-r2 = r2_score(y_test, y_pred)
-print("R-quadrado:", r2)
+# mae = mean_absolute_error(y_test, y_pred)
+# print("Erro Médio Absoluto:", mae)
 
-mape = np.mean(np.abs((y_test - y_pred) / y_test)) * 100
-print("Erro Médio Absoluto Percentual:", mape)
+# mse = mean_squared_error(y_test, y_pred)
+# print("Erro Quadrático Médio:", mse)
 
-medae = median_absolute_error(y_test, y_pred)
-print("Erro Absoluto Mediano:", medae)
+# rmse = np.sqrt(mse)
+# print("Raiz do Erro Quadrático Médio:", rmse)
+
+# r2 = r2_score(y_test, y_pred)
+# print("R-quadrado:", r2)
+
+# mape = np.mean(np.abs((y_test - y_pred) / y_test)) * 100
+# print("Erro Médio Absoluto Percentual:", mape)
+
+# medae = median_absolute_error(y_test, y_pred)
+# print("Erro Absoluto Mediano:", medae)
 
 
 
@@ -147,7 +197,7 @@ joblib.dump(scaler, "scaler_treinado.pkl")
 # Caminhos para os arquivos
 modelo_path = "modelo_treinado.pkl"
 scaler_path = "scaler_treinado.pkl"
-dados_novos_path = "/Users/jaimewojciechowski/Dropbox/Jaime/AA-UFPR/EspecializacaoIAA2026/Praticas Python/5 - Biomassa/Biomassa - Novos Casos - Para Python.csv"  # CSV SEM a variável alvo
+dados_novos_path = "Biomassa - Novos Casos - Para Python.csv"  # CSV SEM a variável alvo
 
 # Carrega o modelo e o scaler
 modelo = joblib.load(modelo_path)
@@ -170,7 +220,7 @@ print(predicoes)
 dados_novos['predicao'] = predicoes
 
 # Exporta para novo CSV
-dados_novos.to_csv("/Users/jaimewojciechowski/Dropbox/Jaime/AA-UFPR/EspecializacaoIAA2026/Praticas Python/5 - Biomassa/Biomassa - Novos Casos - Predicoes em Python RF.csv", index=False)
-print("\nPredições salvas em '/Users/jaimewojciechowski/Dropbox/Jaime/AA-UFPR/EspecializacaoIAA2026/Praticas Python/5 - Biomassa/Biomassa - Novos Casos - Predicoes em Python RF.csv'")
+dados_novos.to_csv("Biomassa - Novos Casos - Predicoes em Python RF.csv", index=False)
+print("\nPredições salvas em 'Biomassa - Novos Casos - Predicoes em Python RF.csv'")
 
 

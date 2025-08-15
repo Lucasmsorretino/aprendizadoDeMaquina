@@ -27,7 +27,7 @@ import seaborn as sns
 import joblib
 
 # Definada as sementes para reprodutibilidade
-random_seed = 196572
+random_seed = 202526
 np.random.seed(random_seed)
 
 scaler = MinMaxScaler()
@@ -36,7 +36,7 @@ le = preprocessing.LabelEncoder()
 
 ##############################################
 # Abre o arquivo e mostra o conteúdo
-df = pd.read_csv('/Users/jaimewojciechowski/Dropbox/Jaime/AA-UFPR/EspecializacaoIAA2026/Praticas Python/10 - Diabetes/Diabetes - Dados.csv',sep=',')
+df = pd.read_csv('Diabetes - Dados.csv',sep=',')
 df = df.drop('num', axis = 1)
 
 #print(df.head())
@@ -61,8 +61,31 @@ X = df.drop('diabetes', axis = 1)
 columns = list(X.columns)
 X = scaler.fit_transform(X)
 X = pd.DataFrame(X, columns=columns)
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 13)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = random_seed)
 #X.head()
+
+rfSemCV = RandomForestClassifier(n_estimators=110, max_depth=10, random_state=random_seed)
+rfSemCV.fit(X_train, y_train)
+
+y_predSemCV = rfSemCV.predict(X_test)
+
+accuracySemCV = accuracy_score(y_test, y_predSemCV)
+class_reportSemCV = classification_report(y_test, y_predSemCV)
+jaccardSemCV = jaccard_score(y_test, y_predSemCV, average=None)
+cohen_kappaSemCV = cohen_kappa_score(y_test, y_predSemCV)
+hammingSemCV = hamming_loss(y_test, y_predSemCV)
+
+# Imprimindo as métricas sem Cross Validations
+print(' ')
+print('Métricas sem Cross Validation')
+print(' ')
+print("Accuracy:", accuracySemCV)
+print("Jaccard Index:", jaccardSemCV)
+print("Cohen's Kappa:", cohen_kappaSemCV)
+print("Hamming Loss:", hammingSemCV)
+print("Classification Report:\n", class_reportSemCV)
+conf_matrixSemCV = confusion_matrix(y_test, y_predSemCV)
+print(' ')
 
 ##############################################
 # EXPERIMENTO RF
@@ -80,7 +103,7 @@ param_grid = {
     'min_samples_leaf': list(range(1, 3, 1))
 }
 
-grid = GridSearchCV(RandomForestClassifier(), param_grid, n_jobs= -1)
+grid = GridSearchCV(RandomForestClassifier(random_state=random_seed), param_grid, n_jobs= -1)
 grid.fit(X_train, y_train)
 
 print(' ')
@@ -99,7 +122,10 @@ jaccard = jaccard_score(y_test, y_pred, average=None)
 cohen_kappa = cohen_kappa_score(y_test, y_pred)
 hamming = hamming_loss(y_test, y_pred)
 
-# Imprimindo as métricas
+# Imprimindo as métricas com Cross Validation
+print(' ')
+print('Métricas com Cross Validation')
+print(' ')
 print("Accuracy:", accuracy)
 print("Jaccard Index:", jaccard)
 print("Cohen's Kappa:", cohen_kappa)
@@ -122,7 +148,11 @@ conf_matrix = confusion_matrix(y_test, y_pred)
 # plt.show()
 
 print(' ')
-print('RF - Diabetes - Matriz de Confusão')
+print('RF - Veiculos - Matriz de Confusão sem Cross Validation')
+print(conf_matrixSemCV)
+
+print(' ')
+print('RF - Diabetes - Matriz de Confusão com Cross Validation')
 print(conf_matrix)
 
 
@@ -138,7 +168,7 @@ joblib.dump(scaler, "scaler_treinado.pkl")
 # Caminhos para os arquivos
 modelo_path = "modelo_treinado.pkl"
 scaler_path = "scaler_treinado.pkl"
-dados_novos_path = "/Users/jaimewojciechowski/Dropbox/Jaime/AA-UFPR/EspecializacaoIAA2026/Praticas Python/10 - Diabetes/Diabetes - Novos Casos - Python.csv"  # CSV SEM a variável alvo
+dados_novos_path = "Diabetes - Novos Casos - Python.csv"  # CSV SEM a variável alvo
 
 # Carrega o modelo e o scaler
 modelo = joblib.load(modelo_path)
@@ -161,7 +191,7 @@ print(predicoes)
 dados_novos['predicao'] = predicoes
 
 # Exporta para novo CSV
-dados_novos.to_csv("/Users/jaimewojciechowski/Dropbox/Jaime/AA-UFPR/EspecializacaoIAA2026/Praticas Python/10 - Diabetes/Diabetes - Novos Casos - Predicoes em Python RF.csv", index=False)
+dados_novos.to_csv("Diabetes - Novos Casos - Predicoes em Python RF.csv", index=False)
 print("\nPredições salvas em 'Diabetes - Novos Casos - Predicoes em Python RF.csv'")
 
 

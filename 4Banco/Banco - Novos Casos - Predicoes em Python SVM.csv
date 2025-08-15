@@ -1,0 +1,4 @@
+age,job,marital,education,default,balance,housing,loan,predicao
+60,2,0,0,0,1,0,1,no
+33,1,0,1,1,2,0,0,no
+15,0,1,2,0,0,0,0,no

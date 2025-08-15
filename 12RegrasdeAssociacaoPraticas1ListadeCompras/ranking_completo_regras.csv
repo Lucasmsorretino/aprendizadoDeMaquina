@@ -1,0 +1,77 @@
+Rank,SE (Antecedente),ENTÃO (Consequente),Confiança (%),Suporte (%),Lift
+1,"AgachamentoSmith, Bicicleta",Extensor,100.00%,30.77%,2.00
+2,"Esteira, Bicicleta",Extensor,100.00%,38.46%,2.00
+3,"AgachamentoSmith, Esteira, Bicicleta",Extensor,100.00%,23.08%,2.00
+4,"AgachamentoSmith, Gemeos, Bicicleta",Extensor,100.00%,15.38%,2.00
+5,"AgachamentoSmith, LegPress, Bicicleta",Extensor,100.00%,19.23%,2.00
+6,"Esteira, LegPress, Bicicleta",Extensor,100.00%,23.08%,2.00
+7,"AgachamentoSmith, Esteira, LegPress, Bicicleta",Extensor,100.00%,15.38%,2.00
+8,"Afundo, LegPress",Gemeos,100.00%,26.92%,1.62
+9,Agachamento,LegPress,100.00%,30.77%,1.24
+10,"Agachamento, Gemeos",LegPress,100.00%,19.23%,1.24
+11,Extensor,Bicicleta,92.31%,46.15%,1.71
+12,Esteira,Extensor,91.67%,42.31%,1.83
+13,"Esteira, Extensor",Bicicleta,90.91%,38.46%,1.69
+14,AgachamentoSmith,Extensor,90.00%,34.62%,1.80
+15,"AgachamentoSmith, Extensor",Bicicleta,88.89%,30.77%,1.65
+16,Afundo,Gemeos,88.89%,30.77%,1.44
+17,"LegPress, Extensor",Esteira,87.50%,26.92%,1.90
+18,"AgachamentoSmith, Esteira",Extensor,87.50%,26.92%,1.75
+19,"Esteira, LegPress",Extensor,87.50%,26.92%,1.75
+20,"LegPress, Extensor",Bicicleta,87.50%,26.92%,1.62
+21,"Afundo, Gemeos",LegPress,87.50%,26.92%,1.08
+22,"AgachamentoSmith, LegPress",Esteira,85.71%,23.08%,1.86
+23,"LegPress, Bicicleta, Extensor",Esteira,85.71%,23.08%,1.86
+24,Bicicleta,Extensor,85.71%,46.15%,1.71
+25,"AgachamentoSmith, LegPress",Extensor,85.71%,23.08%,1.71
+26,"AgachamentoSmith, Esteira, Extensor",Bicicleta,85.71%,23.08%,1.59
+27,"Esteira, LegPress, Extensor",Bicicleta,85.71%,23.08%,1.59
+28,Extensor,Esteira,84.62%,42.31%,1.83
+29,"Gemeos, Extensor",AgachamentoSmith,83.33%,19.23%,2.17
+30,"Bicicleta, Extensor",Esteira,83.33%,38.46%,1.81
+31,Esteira,"Bicicleta, Extensor",83.33%,38.46%,1.81
+32,"AgachamentoSmith, LegPress, Extensor",Esteira,83.33%,19.23%,1.81
+33,"AgachamentoSmith, Gemeos",Extensor,83.33%,19.23%,1.67
+34,"AgachamentoSmith, Esteira, LegPress",Extensor,83.33%,19.23%,1.67
+35,Esteira,Bicicleta,83.33%,38.46%,1.55
+36,"Gemeos, Extensor",Bicicleta,83.33%,19.23%,1.55
+37,"AgachamentoSmith, LegPress, Extensor",Bicicleta,83.33%,19.23%,1.55
+38,"Esteira, Gemeos",AgachamentoSmith,80.00%,15.38%,2.08
+39,"Gemeos, Bicicleta, Extensor",AgachamentoSmith,80.00%,15.38%,2.08
+40,"AgachamentoSmith, LegPress, Bicicleta","Esteira, Extensor",80.00%,15.38%,1.89
+41,AgachamentoSmith,Esteira,80.00%,30.77%,1.73
+42,AgachamentoSmith,"Bicicleta, Extensor",80.00%,30.77%,1.73
+43,"AgachamentoSmith, LegPress, Bicicleta",Esteira,80.00%,15.38%,1.73
+44,"AgachamentoSmith, LegPress, Bicicleta, Extensor",Esteira,80.00%,15.38%,1.73
+45,"Esteira, Gemeos",Extensor,80.00%,15.38%,1.60
+46,AgachamentoSmith,Bicicleta,80.00%,30.77%,1.49
+47,"AgachamentoSmith, Gemeos, Extensor",Bicicleta,80.00%,15.38%,1.49
+48,"AgachamentoSmith, Esteira, LegPress, Extensor",Bicicleta,80.00%,15.38%,1.49
+49,Afundo,"LegPress, Gemeos",77.78%,26.92%,1.69
+50,"AgachamentoSmith, Extensor",Esteira,77.78%,26.92%,1.69
+51,"LegPress, Bicicleta",Extensor,77.78%,26.92%,1.56
+52,Afundo,LegPress,77.78%,26.92%,0.96
+53,Extensor,"Esteira, Bicicleta",76.92%,38.46%,2.00
+54,"Esteira, LegPress",AgachamentoSmith,75.00%,23.08%,1.95
+55,"LegPress, Extensor",AgachamentoSmith,75.00%,23.08%,1.95
+56,"LegPress, Extensor","Esteira, Bicicleta",75.00%,23.08%,1.95
+57,"AgachamentoSmith, Bicicleta","Esteira, Extensor",75.00%,23.08%,1.77
+58,"AgachamentoSmith, Bicicleta",Esteira,75.00%,23.08%,1.62
+59,"AgachamentoSmith, Bicicleta, Extensor",Esteira,75.00%,23.08%,1.62
+60,"AgachamentoSmith, Esteira","Bicicleta, Extensor",75.00%,23.08%,1.62
+61,"Esteira, LegPress","Bicicleta, Extensor",75.00%,23.08%,1.62
+62,"AgachamentoSmith, Esteira",Bicicleta,75.00%,23.08%,1.39
+63,"Esteira, LegPress",Bicicleta,75.00%,23.08%,1.39
+64,Gemeos,LegPress,75.00%,46.15%,0.93
+65,"AgachamentoSmith, Esteira",LegPress,75.00%,23.08%,0.93
+66,"LegPress, Bicicleta, Extensor",AgachamentoSmith,71.43%,19.23%,1.86
+67,"Esteira, LegPress, Extensor",AgachamentoSmith,71.43%,19.23%,1.86
+68,Bicicleta,"Esteira, Extensor",71.43%,38.46%,1.69
+69,"AgachamentoSmith, LegPress","Esteira, Extensor",71.43%,19.23%,1.69
+70,Bicicleta,Esteira,71.43%,38.46%,1.55
+71,"AgachamentoSmith, LegPress","Bicicleta, Extensor",71.43%,19.23%,1.55
+72,"Gemeos, Bicicleta",Extensor,71.43%,19.23%,1.43
+73,"AgachamentoSmith, LegPress",Bicicleta,71.43%,19.23%,1.33
+74,"AgachamentoSmith, Esteira, Extensor",LegPress,71.43%,19.23%,0.88
+75,AgachamentoSmith,"Esteira, Extensor",70.00%,26.92%,1.65
+76,AgachamentoSmith,LegPress,70.00%,26.92%,0.87
