@@ -1,0 +1,7 @@
+support,itemsets
+0.12,frozenset({'LegPress;Gemeos;Afundo;Crucifixo_Adutor;Agachamento;LegPress;Adutor'})
+0.08,frozenset({'LegPress;Gemeos;Afundo;Crucifixo_Extensor;AgachamentoSmith;Bicicleta;Esteira;Gemeos'})
+0.16,frozenset({'LegPress;Gemeos;Afundo;Crucifixo_Extensor;AgachamentoSmith;Bicicleta;Esteira;LegPress'})
+0.08,frozenset({'LegPress;Gemeos;Afundo;Crucifixo_Extensor;Flexor;Bicicleta;Esteira;LegPress'})
+0.08,frozenset({'LegPress;Gemeos;Afundo;Crucifixo_Gemeos;LegPress;Afundo;Agachamento'})
+0.12,frozenset({'LegPress;Gemeos;Afundo;Crucifixo_LegPress;Gemeos;Agachamento'})
