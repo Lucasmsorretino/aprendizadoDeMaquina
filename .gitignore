@@ -2,7 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
-
+.idea
 # C extensions
 *.so
 
@@ -129,14 +129,14 @@ dmypy.json
 .pyre/
 
 # Machine Learning specific
-*.pkl
+
 *.joblib
 *.model
 *.h5
 *.hdf5
 
 # Data files (opcional - remover se quiser versionar os dados)
-*.csv
+
 *.json
 *.xlsx
 *.xls

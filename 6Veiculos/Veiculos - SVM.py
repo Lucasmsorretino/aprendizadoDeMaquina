@@ -37,7 +37,7 @@ le = preprocessing.LabelEncoder()
 ##############################################
 # Abre o arquivo e mostra o conteúdo
 
-df = pd.read_csv('/Users/jaimewojciechowski/Dropbox/Jaime/AA-UFPR/EspecializacaoIAA2026/Praticas Python/6 - Veiculos/Veiculos - Dados.csv',sep=',')
+df = pd.read_csv('/Users/jaimewojciechowski/Dropbox/Jaime/AA-UFPR/EspecializacaoIAA2026/Praticas Python/6 - Veiculos/veiculos.csv',sep=',')
 df = df.drop('a', axis = 1)
 
 df.head()
@@ -135,7 +135,7 @@ joblib.dump(scaler, "svm_scaler_treinado.pkl")
 # Caminhos dos arquivos
 modelo_path = "svm_modelo_treinado.pkl"
 scaler_path = "svm_scaler_treinado.pkl"
-dados_novos_path = "/Users/jaimewojciechowski/Dropbox/Jaime/AA-UFPR/EspecializacaoIAA2026/Praticas Python/6 - Veiculos/Veiculos - Novos Casos - Para Python.csv"  # CSV sem variável alvo
+dados_novos_path = "/Users/jaimewojciechowski/Dropbox/Jaime/AA-UFPR/EspecializacaoIAA2026/Praticas Python/6 - Veiculos/veiculos_novos_casos.csv"  # CSV sem variável alvo
 
 # Carrega o modelo e o scaler
 modelo = joblib.load(modelo_path)
