@@ -4,6 +4,8 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split
 
@@ -88,6 +90,18 @@ resultados:
 [{'MODELO': 'SVM', 'MAE': 0.05292808501405733, 'MSE': 0.004691423511214409, 'RMSE': np.float64(0.0684939669694668), 'R2': 0.7501446153244905, 'MAPE': np.float64(8.26425060027035), 'MedAE': 0.044639025271354715, 'PearsonR': np.float64(0.9032502322667647), 'syx': np.float64(0.00574788602365657), 'params': {'C': 100, 'kernel': 'linear', 'max_iter': 5000}}]
 
 """
+#%%
+##############################################
+# Gráfico de Resíduos
+residuos = y_test - y_pred
+
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=y_pred, y=residuos)
+plt.axhline(y=0, color='r', linestyle='--')
+plt.xlabel('Valores Previstos')
+plt.ylabel('Resíduos')
+plt.title('Gráfico de Resíduos - SVM Regressor')
+plt.show()
 #%%
 ##############################################
 # Predição de Novos Casos
