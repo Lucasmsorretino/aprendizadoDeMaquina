@@ -4,8 +4,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 import pandas as pd
-from sklearn import preprocessing
-import seaborn as sns
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
@@ -13,27 +11,21 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, median_absolute_error
 
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 
-import matplotlib.pyplot as plt
 import joblib
 #%%
 # Definada as sementes para reprodutibilidade
 random_seed = 202526
 np.random.seed(random_seed)
 
-scaler = MinMaxScaler()
-plt.rcParams["figure.figsize"] = [22,8]
-le = preprocessing.LabelEncoder()
-
+scaler = StandardScaler()
 ##############################################
 # Abre o arquivo e mostra o conteúdo
 df = pd.read_csv(r'C:\Users\lcast\OneDrive\Documents\Especialização UFPR\IAA08 - Aprendizado de Máquina\aprendizadoDeMaquina\9Admissao\dados\admissao.csv', sep=',')
 df = df.drop('num', axis = 1)
 
 results = []
-
-#df.info()
 
 print(' ')
 print('###################')
@@ -59,27 +51,28 @@ def get_regression_metrics(y_test, y_pred, modelo,params):
 #%%
 # EXPERIMENTO - Separa as bases
 y = df['ChanceOfAdmit ']
-#y = le.fit_transform(df['ChanceOfAdmit'])
 X = df.drop('ChanceOfAdmit ', axis = 1)
 
-columns = list(X.columns)
-X = scaler.fit_transform(X)
-X = pd.DataFrame(X, columns=columns)
-  
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 9)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 13)
 
-#X.head()
+columns = X_train.columns
+# Assim evita data leakage do scaler para os dados de teste
+X_train = scaler.fit_transform(X_train)
+X_train = pd.DataFrame(X_train, columns=columns)
+
+X_test = scaler.transform(X_test)
+X_test = pd.DataFrame(X_test, columns=columns)
 #%%
 ##############################################
 # EXPERIMENTO RNA
 param_grid = {
     'hidden_layer_sizes': [(100,),(50,50,)],#
     'max_iter': [500],#
-    'activation': ['tanh', 'relu'],
+    'activation': ['tanh', 'relu', 'logistic'],
     'solver': ['sgd', 'adam'],
     'alpha': [0.0001, 0.0002],
     'learning_rate': ['constant','adaptive'],
-    'random_state': [3,5]#
+    'random_state': [10,42]#
 }
 
 grid = GridSearchCV(MLPRegressor(), param_grid, refit=True, n_jobs=-1)
@@ -102,8 +95,8 @@ best_params = grid.best_estimator_
 print(f"Melhores parametros: {best_params}")
 print(results)
 """
-Melhores parametros: MLPRegressor(alpha=0.0002, max_iter=500, random_state=3)
-[{'MODELO': 'MLPRegressor', 'MAE': 0.043012985024392644, 'MSE': 0.003173733036811219, 'RMSE': np.float64(0.0563358947458121), 'R2': 0.8116396436263283, 'MAPE': np.float64(6.352780562613799), 'MedAE': 0.0312006599960461, 'PearsonR': np.float64(0.9048692787018731), 'syx': np.float64(0.004727603267364991), 'params': MLPRegressor(alpha=0.0002, max_iter=500, random_state=3)}]
+Melhores parametros: MLPRegressor(activation='logistic', alpha=0.0002, max_iter=500, random_state=10)
+[{'MODELO': 'MLPRegressor', 'MAE': 0.044418878703070326, 'MSE': 0.0033783045089209383, 'RMSE': np.float64(0.058123183919335825), 'R2': 0.8200785815627736, 'MAPE': np.float64(6.879356115307619), 'MedAE': 0.0368964868244101, 'PearsonR': np.float64(0.9110640158320419), 'syx': np.float64(0.004877589242995651), 'params': MLPRegressor(activation='logistic', alpha=0.0002, max_iter=500, random_state=10)}]
 """
 #%%
 ##############################################
@@ -144,5 +137,5 @@ dados_novos.to_csv("Admissao - Novos Casos - Predicoes em Python RNA CV.csv", in
 print("\nPredições salvas em 'Admissao - Novos Casos - Predicoes em Python RNA CV.csv'")
 """
 Predições:
-[0.45806044 0.42210164 0.43925738]
+[0.50955078 0.23989247 0.4196573 ]
 """

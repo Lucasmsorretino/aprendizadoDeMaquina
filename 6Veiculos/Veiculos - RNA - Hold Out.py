@@ -4,7 +4,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 import pandas as pd
-from sklearn import preprocessing
 
 from sklearn.model_selection import train_test_split
 
@@ -15,7 +14,6 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 
 from sklearn.preprocessing import MinMaxScaler
 
-import matplotlib.pyplot as plt
 import joblib
 #%%
 # Defina a semente para reprodutibilidade
@@ -23,16 +21,11 @@ random_seed = 202526
 np.random.seed(random_seed)
 
 scaler = MinMaxScaler()
-plt.rcParams["figure.figsize"] = [22,8]
-le = preprocessing.LabelEncoder()
-
 ##############################################
 # Abre o arquivo e mostra o conteúdo
 
 df = pd.read_csv(r'C:\Users\lcast\OneDrive\Documents\Especialização UFPR\IAA08 - Aprendizado de Máquina\aprendizadoDeMaquina\6Veiculos\dados\veiculos.csv', sep=',')
 df = df.drop('a', axis = 1)
-
-df.head()
 
 print(' ')
 print('###################')
@@ -43,12 +36,15 @@ print(df.head())
 # EXPERIMENTO - Separa as bases
 y = df['tipo']
 X = df.drop('tipo', axis = 1)
-
-columns = list(X.columns)
-X = scaler.fit_transform(X)
-X = pd.DataFrame(X, columns=columns)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 13)
-#X.head()
+
+columns = X_train.columns
+# Assim evita data leakage do scaler para os dados de teste
+X_train = scaler.fit_transform(X_train)
+X_train = pd.DataFrame(X_train, columns=columns)
+
+X_test = scaler.transform(X_test)
+X_test = pd.DataFrame(X_test, columns=columns)
 #%%
 ##############################################
 # EXPERIMENTO - Trinamento com HOLD-OUT
@@ -81,19 +77,19 @@ print("Cohen's Kappa:", cohen_kappa)
 print("Hamming Loss:", hamming)
 print("Classification Report:\n", class_report)
 """
-Accuracy: 0.7795275590551181
-Jaccard Index: [0.92857143 0.37037037 0.47058824 0.96491228]
-Cohen's Kappa: 0.704743124026985
-Hamming Loss: 0.2204724409448819
+Accuracy: 0.7755905511811023
+Jaccard Index: [0.92857143 0.35802469 0.46601942 0.96491228]
+Cohen's Kappa: 0.6994145247685088
+Hamming Loss: 0.22440944881889763
 Classification Report:
                precision    recall  f1-score   support
          bus       0.97      0.96      0.96        68
-        opel       0.60      0.49      0.54        61
-        saab       0.60      0.69      0.64        70
+        opel       0.59      0.48      0.53        61
+        saab       0.59      0.69      0.64        70
          van       0.96      1.00      0.98        55
     accuracy                           0.78       254
    macro avg       0.78      0.78      0.78       254
-weighted avg       0.78      0.78      0.78       254
+weighted avg       0.77      0.78      0.77       254
 """
 #%%
 conf_matrix = confusion_matrix(y_test, y_pred)

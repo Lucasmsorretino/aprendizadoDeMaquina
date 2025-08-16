@@ -4,26 +4,21 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 import pandas as pd
-from sklearn import preprocessing
 
 from sklearn.model_selection import train_test_split
 
 from sklearn.neural_network import MLPRegressor
 from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score, median_absolute_error
-from sklearn.pipeline import make_pipeline
 
-from sklearn.preprocessing import MinMaxScaler, StandardScaler
+from sklearn.preprocessing import StandardScaler
 
-import matplotlib.pyplot as plt
 import joblib
 #%%
 # Defina as sementes para reprodutibilidade
 random_seed = 202526
 np.random.seed(random_seed)
 
-plt.rcParams["figure.figsize"] = [22,8]
-le = preprocessing.LabelEncoder()
-
+scaler = StandardScaler()
 ##############################################
 # Abre o arquivo e mostra o conteúdo
 df = pd.read_csv(r'C:\Users\lcast\OneDrive\Documents\Especialização UFPR\IAA08 - Aprendizado de Máquina\aprendizadoDeMaquina\9Admissao\dados\admissao.csv', sep=',')
@@ -57,9 +52,15 @@ def get_regression_metrics(y_test, y_pred, modelo,params):
 y = df['ChanceOfAdmit ']
 X = df.drop('ChanceOfAdmit ', axis = 1)
 
-# O escalonamento manual foi removido daqui para evitar data leakage.
-# O Pipeline cuidará disso da maneira correta.
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 9)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 13)
+
+columns = X_train.columns
+# Assim evita data leakage do scaler para os dados de teste
+X_train = scaler.fit_transform(X_train)
+X_train = pd.DataFrame(X_train, columns=columns)
+
+X_test = scaler.transform(X_test)
+X_test = pd.DataFrame(X_test, columns=columns)
 
 #%%
 ##############################################
@@ -70,15 +71,11 @@ print('###########################')
 print('EXPERIMENTO RNA - Alunos - HOLD OUT')
 print(' ')
 
-# O Pipeline aplica o MinMaxScaler (apenas nos dados de treino) e depois treina o MLP.
-pipeline = make_pipeline(
-    StandardScaler(),
-    MLPRegressor(hidden_layer_sizes=(100,), activation='logistic', max_iter=1000, random_state=42)
-)
-mlp = pipeline.fit(X_train, y_train)
-y_pred = pipeline.predict(X_test)
+mlp = MLPRegressor(hidden_layer_sizes=(50,50), activation='logistic', max_iter=2000, random_state=42)
+mlp.fit(X_train, y_train)
+y_pred = mlp.predict(X_test)
 
-params = {"hidden_layer_sizes": 100, "activation":'logistic', "max_iter": 1000, "random_state": 42}
+params = {"hidden_layer_sizes": (50,50), "activation":'logistic', "max_iter": 2000, "random_state": 42}
 metrics_model = get_regression_metrics(y_test, y_pred,"MLPRegressor", params)
 results.append(metrics_model)
 #%%
@@ -94,44 +91,49 @@ print(results)
 """
 parâmetros:
  
-{'hidden_layer_sizes': 100, activation: 'logistic', 'max_iter': 1000, 'random_state': 42}
+{'hidden_layer_sizes': (50,50), 'activation': 'logistic', 'max_iter': 2000, 'random_state': 42}
 resultados:
-[{'MODELO': 'MLPRegressor', 'MAE': 0.0751404127636066, 'MSE': 0.00825629965349675, 'RMSE': np.float64(0.09086418245654747), 'R2': 0.5099904349160373, 'MAPE': np.float64(11.468825921254592), 'MedAE': 0.0665369954050547, 'PearsonR': np.float64(0.8970037458998672), 'syx': np.float64(0.007625152805440369), 'params': {'hidden_layer_sizes': 100, activation: 'logistic', 'max_iter': 1000, 'random_state': 42}}]
+[{'MODELO': 'MLPRegressor', 'MAE': 0.045840765076143306, 'MSE': 0.0037456924277224483, 'RMSE': np.float64(0.061202062283247025), 'R2': 0.8005122709199887, 'MAPE': np.float64(7.208397378912693), 'MedAE': 0.03498189992385309, 'PearsonR': np.float64(0.8994265111702533), 'syx': np.float64(0.00513596297574138), 'params': {'hidden_layer_sizes': 100, 'activation': 'logistic', 'max_iter': 1000, 'random_state': 42}}]
+
 """
 #%%
 ##############################################
 # Predição de Novos Casos
 
-# Salva o pipeline inteiro, que contém tanto o scaler quanto o modelo já treinados.
-pipeline_path = "pipeline_admissao_rna_hold_out.pkl"
-joblib.dump(mlp, pipeline_path)
-print(f"\nPipeline completo salvo em: {pipeline_path}")
+# Salva o modelo e o scaler
+joblib.dump(mlp, "modelo_treinado_rna_cv.pkl")
+joblib.dump(scaler, "scaler_treinado_rna_cv.pkl")
 
-# Caminho para os novos dados
+
+# Caminhos para os arquivos
+modelo_path = "modelo_treinado_rna_cv.pkl"
+scaler_path = "scaler_treinado_rna_cv.pkl"
 dados_novos_path = r'C:\Users\lcast\OneDrive\Documents\Especialização UFPR\IAA08 - Aprendizado de Máquina\aprendizadoDeMaquina\9Admissao\dados\admissao_novos_casos.csv'
 #%%
-# Carrega o pipeline completo
-pipeline_carregado = joblib.load(pipeline_path)
+# Carrega o modelo e o scaler
+modelo = joblib.load(modelo_path)
+scaler = joblib.load(scaler_path)
 
 # Lê o novo arquivo CSV sem a variável alvo
 dados_novos = pd.read_csv(dados_novos_path)
 
-# Faz a predição usando o pipeline. Ele aplicará o scaler e o modelo automaticamente.
-predicoes = pipeline_carregado.predict(dados_novos)
+# Aplica a mesma padronização dos dados
+dados_novos_scaled = scaler.transform(dados_novos)
 
+# Faz a predição
+predicoes = modelo.predict(dados_novos_scaled)
 
 # Mostra os resultados
-print("\nPredições para novos casos:")
+print("Predições:")
 print(predicoes)
 
 # Salva as predições no mesmo DataFrame
 dados_novos['predicao'] = predicoes
 
 # Exporta para novo CSV
-output_path = "predicoes_admissao_rna_hold_out.csv"
-dados_novos.to_csv(output_path, index=False)
-print(f"\nPredições salvas em '{output_path}'")
+dados_novos.to_csv("Admissao - Novos Casos - Predicoes em Python RNA HOLD OUT.csv", index=False)
+print("\nPredições salvas em 'Admissao - Novos Casos - Predicoes em Python RNA HOLD OUT.csv'")
 """
 Predições para novos casos:
-[0.46255357 0.37504691 0.38921742]
+[0.56305045 0.43345496 0.46640447]
 """

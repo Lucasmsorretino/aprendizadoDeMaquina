@@ -4,7 +4,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 import pandas as pd
-from sklearn import preprocessing
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
@@ -16,7 +15,6 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 
 from sklearn.preprocessing import MinMaxScaler
 
-import matplotlib.pyplot as plt
 import joblib
 #%%
 # Defina a semente para reprodutibilidade
@@ -24,9 +22,6 @@ random_seed = 202526
 np.random.seed(random_seed)
 
 scaler = MinMaxScaler()
-plt.rcParams["figure.figsize"] = [22,8]
-le = preprocessing.LabelEncoder()
-
 ##############################################
 # Abre o arquivo e mostra o conteúdo
 
@@ -42,12 +37,15 @@ print(df.head())
 # EXPERIMENTO - Separa as bases
 y = df['tipo']
 X = df.drop('tipo', axis = 1)
-
-columns = list(X.columns)
-X = scaler.fit_transform(X)
-X = pd.DataFrame(X, columns=columns)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 13)
-#X.head()
+
+columns = X_train.columns
+# Assim evita data leakage do scaler para os dados de teste
+X_train = scaler.fit_transform(X_train)
+X_train = pd.DataFrame(X_train, columns=columns)
+
+X_test = scaler.transform(X_test)
+X_test = pd.DataFrame(X_test, columns=columns)
 #%%
 ##############################################
 # EXPERIMENTO RNA
@@ -70,9 +68,11 @@ print(' ')
 print('Melhores parâmetros:')
 print(' ')
 print(grid.best_params_)
-# Melhores parâmetros:
-#
-# {'activation': 'relu', 'alpha': 0.0002, 'hidden_layer_sizes': (50, 50), 'learning_rate': 'constant', 'max_iter': 500, 'random_state': 3, 'solver': 'adam'}
+"""
+Melhores parâmetros:
+ 
+{'activation': 'relu', 'alpha': 0.0001, 'hidden_layer_sizes': (50, 50), 'learning_rate': 'constant', 'max_iter': 500, 'random_state': 3, 'solver': 'adam'}
+"""
 #%%
 y_pred = grid.predict(X_test)
 
@@ -89,22 +89,20 @@ print("Cohen's Kappa:", cohen_kappa)
 print("Hamming Loss:", hamming)
 print("Classification Report:\n", class_report)
 """
-Accuracy: 0.7913385826771654
-Jaccard Index: [0.95652174 0.36708861 0.49514563 0.98214286]
-Cohen's Kappa: 0.7203166226912929
-Hamming Loss: 0.20866141732283464
+Accuracy: 0.7874015748031497
+Jaccard Index: [0.95652174 0.35802469 0.49019608 0.98214286]
+Cohen's Kappa: 0.7151461028846753
+Hamming Loss: 0.2125984251968504
 Classification Report:
                precision    recall  f1-score   support
          bus       0.99      0.97      0.98        68
-        opel       0.62      0.48      0.54        61
-        saab       0.61      0.73      0.66        70
+        opel       0.59      0.48      0.53        61
+        saab       0.61      0.71      0.66        70
          van       0.98      1.00      0.99        55
     accuracy                           0.79       254
-   macro avg       0.80      0.79      0.79       254
-weighted avg       0.79      0.79      0.79       254
-
+   macro avg       0.79      0.79      0.79       254
+weighted avg       0.79      0.79      0.78       254
 """
-
 #%%
 conf_matrix = confusion_matrix(y_test, y_pred)
 print(' ')
@@ -112,9 +110,9 @@ print('RNA - Veiculos - Matriz de Confusão')
 print(conf_matrix)
 """
 RNA - Veiculos - Matriz de Confusão
-[[66  0  1  1]
+[[66  1  0  1]
  [ 0 29 32  0]
- [ 1 18 51  0]
+ [ 1 19 50  0]
  [ 0  0  0 55]]
 """
 #%%

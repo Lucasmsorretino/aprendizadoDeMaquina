@@ -4,7 +4,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 import pandas as pd
-from sklearn import preprocessing
 
 from sklearn.model_selection import train_test_split
 
@@ -15,7 +14,6 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 
 from sklearn.preprocessing import MinMaxScaler
 
-import matplotlib.pyplot as plt
 import joblib
 #%%
 # Defina a semente para reprodutibilidade
@@ -23,16 +21,11 @@ random_seed = 202526
 np.random.seed(random_seed)
 
 scaler = MinMaxScaler()
-plt.rcParams["figure.figsize"] = [22,8]
-le = preprocessing.LabelEncoder()
-
 ##############################################
 # Abre o arquivo e mostra o conteúdo
 
 df = pd.read_csv(r'C:\Users\lcast\OneDrive\Documents\Especialização UFPR\IAA08 - Aprendizado de Máquina\aprendizadoDeMaquina\10Diabetes\dados\diabetes.csv', sep=',')
 df = df.drop('num', axis = 1)
-
-df.head()
 
 print(' ')
 print('###################')
@@ -43,17 +36,20 @@ print(df.head())
 # EXPERIMENTO - Separa as bases
 y = df['diabetes']
 X = df.drop('diabetes', axis = 1)
-
-columns = list(X.columns)
-X = scaler.fit_transform(X)
-X = pd.DataFrame(X, columns=columns)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 13)
-#X.head()
+
+columns = X_train.columns
+# Assim evita data leakage do scaler para os dados de teste
+X_train = scaler.fit_transform(X_train)
+X_train = pd.DataFrame(X_train, columns=columns)
+
+X_test = scaler.transform(X_test)
+X_test = pd.DataFrame(X_test, columns=columns)
 #%%
 ##############################################
 # EXPERIMENTO - Trinamento com HOLD-OUT
 mlp = MLPClassifier(
-    hidden_layer_sizes=(100,),  # Uma camada oculta com 100 neurônios
+    hidden_layer_sizes=(100,),
     max_iter=1000,
     alpha=0.0001,
     solver='adam',
@@ -82,17 +78,17 @@ print("Hamming Loss:", hamming)
 print("Classification Report:\n", class_report)
 """
 EXPERIMENTO RNA - Diabetes - HOLD-OUT
-Accuracy: 0.7402597402597403
-Jaccard Index: [0.67032967 0.44954128]
-Cohen's Kappa: 0.4259443339960238
-Hamming Loss: 0.2597402597402597
+Accuracy: 0.7489177489177489
+Jaccard Index: [0.67777778 0.46788991]
+Cohen's Kappa: 0.44768736087064065
+Hamming Loss: 0.2510822510822511
 Classification Report:
                precision    recall  f1-score   support
-         neg       0.76      0.85      0.80       144
-         pos       0.69      0.56      0.62        87
-    accuracy                           0.74       231
-   macro avg       0.73      0.71      0.71       231
-weighted avg       0.74      0.74      0.73       231
+         neg       0.77      0.85      0.81       144
+         pos       0.70      0.59      0.64        87
+    accuracy                           0.75       231
+   macro avg       0.74      0.72      0.72       231
+weighted avg       0.74      0.75      0.74       231
 """
 #%%
 conf_matrix = confusion_matrix(y_test, y_pred)

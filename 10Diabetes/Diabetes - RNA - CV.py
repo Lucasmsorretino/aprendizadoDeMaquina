@@ -4,7 +4,6 @@ warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 import pandas as pd
-from sklearn import preprocessing
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
@@ -16,7 +15,6 @@ from sklearn.metrics import accuracy_score, confusion_matrix, classification_rep
 
 from sklearn.preprocessing import MinMaxScaler
 
-import matplotlib.pyplot as plt
 import joblib
 #%%
 # Defina a semente para reprodutibilidade
@@ -24,9 +22,6 @@ random_seed = 202526
 np.random.seed(random_seed)
 
 scaler = MinMaxScaler()
-plt.rcParams["figure.figsize"] = [22,8]
-le = preprocessing.LabelEncoder()
-
 ##############################################
 # Abre o arquivo e mostra o conteúdo
 df = pd.read_csv(r'C:\Users\lcast\OneDrive\Documents\Especialização UFPR\IAA08 - Aprendizado de Máquina\aprendizadoDeMaquina\10Diabetes\dados\diabetes.csv', sep=',')
@@ -40,12 +35,15 @@ print(df.head())
 # EXPERIMENTO - Separa as bases
 y = df['diabetes']
 X = df.drop('diabetes', axis = 1)
-
-columns = list(X.columns)
-X = scaler.fit_transform(X)
-X = pd.DataFrame(X, columns=columns)
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 13)
-#X.head()
+
+columns = X_train.columns
+# Assim evita data leakage do scaler para os dados de teste
+X_train = scaler.fit_transform(X_train)
+X_train = pd.DataFrame(X_train, columns=columns)
+
+X_test = scaler.transform(X_test)
+X_test = pd.DataFrame(X_test, columns=columns)
 #%%
 ##############################################
 # EXPERIMENTO RNA
@@ -90,17 +88,17 @@ print("Cohen's Kappa:", cohen_kappa)
 print("Hamming Loss:", hamming)
 print("Classification Report:\n", class_report)
 """
-Accuracy: 0.7619047619047619
-Jaccard Index: [0.68390805 0.50892857]
-Cohen's Kappa: 0.48710185297323483
-Hamming Loss: 0.23809523809523808
+Accuracy: 0.7705627705627706
+Jaccard Index: [0.6954023  0.51818182]
+Cohen's Kappa: 0.5034675751307945
+Hamming Loss: 0.22943722943722944
 Classification Report:
                precision    recall  f1-score   support
-         neg       0.80      0.83      0.81       144
-         pos       0.70      0.66      0.67        87
-    accuracy                           0.76       231
-   macro avg       0.75      0.74      0.74       231
-weighted avg       0.76      0.76      0.76       231
+         neg       0.80      0.84      0.82       144
+         pos       0.71      0.66      0.68        87
+    accuracy                           0.77       231
+   macro avg       0.76      0.75      0.75       231
+weighted avg       0.77      0.77      0.77       23
 """
 #%%
 
@@ -110,7 +108,7 @@ print('RNA - Diabetes - Matriz de Confusão')
 print(conf_matrix)
 """
 RNA - Diabetes - Matriz de Confusão
-[[119  25]
+[[121  23]
  [ 30  57]]
 """
 #%%

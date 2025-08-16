@@ -17,7 +17,7 @@ from sklearn.preprocessing import MinMaxScaler
 import matplotlib.pyplot as plt
 import joblib
 #%%
-# Definada as sementes para reprodutibilidade
+# Defina as sementes para reprodutibilidade
 random_seed = 202526
 np.random.seed(random_seed)
 
@@ -30,8 +30,6 @@ le = preprocessing.LabelEncoder()
 df = pd.read_csv(r'C:\Users\lcast\OneDrive\Documents\Especialização UFPR\IAA08 - Aprendizado de Máquina\aprendizadoDeMaquina\5Biomassa\dados\biomassa.csv', sep=',')
 
 results = []
-
-#df.info()
 
 print(' ')
 print('###################')
@@ -59,18 +57,20 @@ def get_regression_metrics(y_test, y_pred, modelo,params):
 y = df['biomassa']
 X = df.drop('biomassa', axis = 1)
 
-columns = list(X.columns)
-X = scaler.fit_transform(X)
-X = pd.DataFrame(X, columns=columns)
-  
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 9)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 13)
 
-#X.head()
+columns = X_train.columns
+# Assim evita data leakage do scaler para os dados de teste
+X_train = scaler.fit_transform(X_train)
+X_train = pd.DataFrame(X_train, columns=columns)
+
+X_test = scaler.transform(X_test)
+X_test = pd.DataFrame(X_test, columns=columns)
 #%%
 ##############################################
 # EXPERIMENTO RNA
 param_grid = {
-    'hidden_layer_sizes': [(100,),(50,50,)],#
+    'hidden_layer_sizes': [(100,),(50,50,), (35,5)],#
     'max_iter': [500],#
     'activation': ['tanh', 'relu'],
     'solver': ['sgd', 'adam'],
@@ -99,10 +99,10 @@ best_params = grid.best_estimator_
 print(f"Melhores parametros: {best_params}")
 print(results)
 """
-Melhores parametros: MLPRegressor(activation='tanh', alpha=0.0002, learning_rate='adaptive',
-             max_iter=500, random_state=5, solver='sgd')
-[{'MODELO': 'MLPRegressor', 'MAE': 123.20753156883592, 'MSE': 33462.27752467341, 'RMSE': np.float64(182.92697320153036), 'R2': 0.9137452353510436, 'MAPE': np.float64(259.188101626098), 'MedAE': 97.63445959974649, 'PearsonR': np.float64(0.9690857391944342), 'syx': np.float64(19.725522814032082), 'params': MLPRegressor(activation='tanh', alpha=0.0002, learning_rate='adaptive',
-             max_iter=500, random_state=5, solver='sgd')}]
+Melhores parametros: MLPRegressor(learning_rate='adaptive', max_iter=500, random_state=5,
+             solver='sgd')
+[{'MODELO': 'MLPRegressor', 'MAE': 193.6334567253686, 'MSE': 247020.66667173855, 'RMSE': np.float64(497.01173695571674), 'R2': 0.884632728510411, 'MAPE': np.float64(100.92029680592063), 'MedAE': 53.19, 'PearsonR': np.float64(0.9621948524297), 'syx': np.float64(53.594153910592794), 'params': MLPRegressor(learning_rate='adaptive', max_iter=500, random_state=5,
+             solver='sgd')}]
 
 """
 #%%
@@ -144,5 +144,5 @@ dados_novos.to_csv("Biomassa - Novos Casos - Predicoes em Python RNA CV.csv", in
 print("\nPredições salvas em 'Biomassa - Novos Casos - Predicoes em Python RNA CV.csv'")
 """
 Predições:
-[146.70433806 146.71507681 146.6986941  146.71065751]
+[78.4079744  78.40861557 78.40793543 78.40894131]
 """
