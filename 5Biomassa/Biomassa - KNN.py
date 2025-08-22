@@ -1,54 +1,42 @@
 import warnings
+
 warnings.filterwarnings("ignore")
 warnings.simplefilter(action='ignore', category=FutureWarning)
 
 import numpy as np
 import pandas as pd
-from sklearn import preprocessing
-from sklearn.preprocessing import OneHotEncoder
 
 from sklearn.model_selection import train_test_split
 from sklearn.model_selection import GridSearchCV
 
 from sklearn.neighbors import KNeighborsRegressor
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.svm import SVR
-from sklearn.neural_network import MLPRegressor
 
-from sklearn.metrics import classification_report, accuracy_score
 from sklearn.metrics import mean_absolute_error, r2_score, median_absolute_error, mean_squared_error
 
-from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import StandardScaler
 
 from scipy.stats import pearsonr
 
-import statsmodels.api as sm
-
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
 import seaborn as sns
 import joblib
-
+#%%
 # Definida as sementes para reprodutibilidade
 random_seed = 202526
 np.random.seed(random_seed)
 
-scaler = MinMaxScaler()
+scaler = StandardScaler()
 plt.rcParams["figure.figsize"] = [22,8]
-le = preprocessing.LabelEncoder()
-
-
 ##############################################
 # Abre o arquivo e mostra o conteúdo
-df = pd.read_csv('Biomassa - Dados.csv',sep=',')
-#df = df.drop('num', axis = 1)
+df = pd.read_csv(r'C:\Users\lcast\OneDrive\Documents\Especialização UFPR\IAA08 - Aprendizado de Máquina\aprendizadoDeMaquina\5Biomassa\dados\biomassa.csv', sep=',')
 results = []
 
 print(' ')
 print('###################')
 print('Conteúdo do arquivo - Biomassa')
 print(df.head())
-
-
+#%%
 ##############################################
 # Define as métricas
 def get_regression_metrics(y_test, y_pred, modelo):
@@ -67,46 +55,28 @@ def get_regression_metrics(y_test, y_pred, modelo):
         "P_VALOR_PEARSON": p_valor
     }
     return metrics
-
-##############################################
-# Mostra gráfico de correlação
-#corr = df.corr(method='pearson')
-#sns.heatmap(corr,cmap='seismic',annot=True, fmt=".3f")
-#plt.show()
-#print("Correlação das Features com a Variável Alvo (biomassa)")
-#corr_alvo = corr['biomassa'].sort_values(ascending=False)
-#print(corr_alvo)
-
-
-##############################################
+#%%
 # EXPERIMENTO - Separa as bases
 y = df['biomassa']
-#y = le.fit_transform(df['tipo'])
 X = df.drop('biomassa', axis = 1)
 
-columns = list(X.columns)
-X = scaler.fit_transform(X)
-X = pd.DataFrame(X, columns=columns)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = 13)
 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.3, random_state = random_seed)
-#X.head()
+columns = X_train.columns
+# Assim evita data leakage do scaler para os dados de teste
+X_train = scaler.fit_transform(X_train)
+X_train = pd.DataFrame(X_train, columns=columns)
 
-
-##############################################
-# EXPERIMENTO
-# param_grid = {
-#     'n_neighbors': range(1,100,1),  # De 1 até 100 de 1 em 1
-#     'weights': ['uniform', 'distance'],
-#    'metric': ['euclidean', 'manhattan']
-# }
+X_test = scaler.transform(X_test)
+X_test = pd.DataFrame(X_test, columns=columns)
 param_grid = {
-    'n_neighbors': list(range(1, 21)),
+    'n_neighbors': list(range(2, 40)),
     'weights': ['uniform', 'distance'],
-    'metric': ['euclidean', 'manhattan']
+    'metric': ['euclidean', 'manhattan', 'braycurtis', 'canberra', 'chebyshev', 'minkowski', 'seuclidean', 'mahalanobis']
 }
-
 grid = GridSearchCV(KNeighborsRegressor(), param_grid, n_jobs= -1, cv=9)
 grid.fit(X_train, y_train)
+#%%
 y_pred = grid.predict(X_test)
 metrics_model = get_regression_metrics(y_test, y_pred,"KNeighborsRegressor")
 results.append(metrics_model)
@@ -131,38 +101,19 @@ print(f"Erro Padrão da Estimativa (Syx):      {metrics_model['syx']:.8f}")
 print(f"Erro Absoluto Mediano (MedAE):       {metrics_model['MedAE']:.8f}")
 print('='*50)
 
-# print(' ')
-# print('###########################')
-# print('EXPERIMENTO KNN - Biomassa')
-# print(' ')
-# print('Melhores parâmetros:')
-# print(' ')
+#%%
+##############################################
+# Gráfico de Resíduos
+residuos = y_test - y_pred
 
-# best_params = grid.best_estimator_
-# print(f"Melhores parametros: {best_params}")
-
-# mae = mean_absolute_error(y_test, y_pred)
-# print("Erro Médio Absoluto:", mae)
-
-# mse = mean_squared_error(y_test, y_pred)
-# print("Erro Quadrático Médio:", mse)
-
-# rmse = np.sqrt(mse)
-# print("Raiz do Erro Quadrático Médio:", rmse)
-
-# r2 = r2_score(y_test, y_pred)
-# print("R-quadrado:", r2)
-
-# mape = np.mean(np.abs((y_test - y_pred) / y_test)) * 100
-# print("Erro Médio Absoluto Percentual:", mape)
-
-# medae = median_absolute_error(y_test, y_pred)
-# print("Erro Absoluto Mediano:", medae)
-
-# syx = np.sqrt(mse / (len(y_test) - len(X_train.columns) - 1))
-# print("Erro Padrão da Estimativa (Syx):", syx)
-
-
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x=y_pred, y=residuos)
+plt.axhline(y=0, color='r', linestyle='--')
+plt.xlabel('Valores Previstos')
+plt.ylabel('Resíduos')
+plt.title('Gráfico de Resíduos - KNN Regressor')
+plt.show()
+#%%
 ##############################################
 # Predição de Novos Casos
 
@@ -170,11 +121,10 @@ print('='*50)
 joblib.dump(grid.best_estimator_, "modelo_treinado.pkl")
 joblib.dump(scaler, "scaler_treinado.pkl")
 
-
 # Caminhos para os arquivos
 modelo_path = "modelo_treinado.pkl"
 scaler_path = "scaler_treinado.pkl"
-dados_novos_path = "Biomassa - Novos Casos - Para Python.csv"  # CSV SEM a variável alvo
+dados_novos_path = r'C:\Users\lcast\OneDrive\Documents\Especialização UFPR\IAA08 - Aprendizado de Máquina\aprendizadoDeMaquina\5Biomassa\dados\biomassa_novos_casos.csv'
 
 # Carrega o modelo e o scaler
 modelo = joblib.load(modelo_path)
@@ -199,6 +149,3 @@ dados_novos['predicao'] = predicoes
 # Exporta para novo CSV
 dados_novos.to_csv("Biomassa - Novos Casos - Predicoes em Python KNN.csv", index=False)
 print("\nPredições salvas em 'Biomassa - Novos Casos - Predicoes em Python KNN.csv'")
-
-
-
